@@ -31,7 +31,7 @@ Task Tracker is a Go-based web server for managing tasks:
 
    ```env
    TODO_DB_FILE=../scheduler.db
-   PORT=7540
+   TODO_PORT=7540
    ```
 3. Run the server:
 
