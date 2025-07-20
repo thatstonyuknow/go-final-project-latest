@@ -18,11 +18,12 @@ func main() {
 	}
 	defer database.Close()
 
+	taskStore := db.NewDataTaskStore(database)
+
 	// Load configuration
 	config := server.LoadConfig()
 
-	// Setup router with all routes and database connection
-	router := server.SetupRouter(config, database)
+	router := server.SetupRouter(config, taskStore)
 
 	// Start server
 	log.Infof("Listening server on port %s\n", config.Port)

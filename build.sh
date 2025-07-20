@@ -4,15 +4,6 @@
 
 echo "Building task-tracker application..."
 
-# Build for Linux (required for Docker container)
-echo "Compiling for Linux..."
-GOOS=linux GOARCH=amd64 go build -o task-tracker .
-
-if [ $? -ne 0 ]; then
-    echo "Failed to compile application"
-    exit 1
-fi
-
 echo "Building Docker image..."
 docker build -t task-tracker:latest .
 

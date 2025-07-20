@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 
 	"task-tracker/pkg/db"
@@ -13,13 +12,13 @@ type TasksResp struct {
 }
 
 // TasksHandler handles GET requests to retrieve list of tasks
-func TasksHandler(database *sql.DB, w http.ResponseWriter, r *http.Request) {
+func TasksHandler(store db.TaskStore, w http.ResponseWriter, r *http.Request) {
 	// Get search parameter
 	search := r.URL.Query().Get("search")
 
-	tasks, err := db.Tasks(database, 100, search)
+	tasks, err := store.Tasks(100, search)
 	if err != nil {
-		writeJson(w, map[string]string{"error": "failed to get tasks"})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": "failed to get tasks"})
 		return
 	}
 
@@ -29,7 +28,7 @@ func TasksHandler(database *sql.DB, w http.ResponseWriter, r *http.Request) {
 		jsonTasks = append(jsonTasks, convertTaskToJSON(task))
 	}
 
-	writeJson(w, TasksResp{
+	writeJson(w, http.StatusOK, TasksResp{
 		Tasks: jsonTasks,
 	})
 }

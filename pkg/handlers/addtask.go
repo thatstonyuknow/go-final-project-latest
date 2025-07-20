@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -11,34 +10,34 @@ import (
 )
 
 // AddTaskHandler handles POST requests to add a new task
-func AddTaskHandler(database *sql.DB, w http.ResponseWriter, r *http.Request) {
+func AddTaskHandler(store db.TaskStore, w http.ResponseWriter, r *http.Request) {
 	var task db.Task
 
 	// Decode JSON request
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		writeJson(w, map[string]string{"error": "invalid JSON format"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON format"})
 		return
 	}
 
 	// Validate title is not empty
 	if strings.TrimSpace(task.Title) == "" {
-		writeJson(w, map[string]string{"error": "Task title not specified"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": "Task title not specified"})
 		return
 	}
 
 	// Check and adjust date
 	if err := checkDate(&task); err != nil {
-		writeJson(w, map[string]string{"error": "invalid date format or repeat rule"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": "invalid date format or repeat rule"})
 		return
 	}
 
 	// Add task to database
-	id, err := db.AddTask(database, &task)
+	id, err := store.AddTask(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": "failed to add task"})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": "failed to add task"})
 		return
 	}
 
 	// Return success response with ID
-	writeJson(w, map[string]string{"id": strconv.FormatInt(id, 10)})
+	writeJson(w, http.StatusOK, map[string]string{"id": strconv.FormatInt(id, 10)})
 }

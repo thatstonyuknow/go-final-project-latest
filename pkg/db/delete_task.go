@@ -1,15 +1,14 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 )
 
 // DeleteTask deletes a task by ID
-func DeleteTask(db *sql.DB, id string) error {
+func (d *DataTaskStore) DeleteTask(id string) error {
 	query := `DELETE FROM scheduler WHERE id = ?`
 
-	res, err := db.Exec(query, id)
+	res, err := d.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete task: %v", err)
 	}
@@ -27,10 +26,10 @@ func DeleteTask(db *sql.DB, id string) error {
 }
 
 // UpdateDate updates only the date field of a task
-func UpdateDate(db *sql.DB, nextDate string, id string) error {
+func (d *DataTaskStore) UpdateDate(nextDate string, id string) error {
 	query := `UPDATE scheduler SET date = ? WHERE id = ?`
 
-	res, err := db.Exec(query, nextDate, id)
+	res, err := d.db.Exec(query, nextDate, id)
 	if err != nil {
 		return fmt.Errorf("failed to update task date: %v", err)
 	}

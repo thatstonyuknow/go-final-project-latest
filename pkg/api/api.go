@@ -1,44 +1,37 @@
 package api
 
 import (
-	"database/sql"
 	"net/http"
 
+	"task-tracker/pkg/db"
 	"task-tracker/pkg/handlers"
 
 	"github.com/go-chi/chi/v5"
 )
 
-// taskHandler handles different HTTP methods for /api/task
-func taskHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		handlers.AddTaskHandler(db, w, r)
-	case http.MethodGet:
-		handlers.GetTaskHandler(db, w, r)
-	case http.MethodPut:
-		handlers.UpdateTaskHandler(db, w, r)
-	case http.MethodDelete:
-		handlers.DeleteTaskHandler(db, w, r)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-// Init initializes API routes
-func Init(r chi.Router, db *sql.DB) {
+// Init API routes
+func Init(r chi.Router, store db.TaskStore) {
+	// GET endpoints
 	r.Get("/nextdate", handlers.NextDateHandler)
-	r.HandleFunc("/task", func(w http.ResponseWriter, r *http.Request) {
-		taskHandler(db, w, r)
-	})
 	r.Get("/tasks", func(w http.ResponseWriter, r *http.Request) {
-		handlers.TasksHandler(db, w, r)
+		handlers.TasksHandler(store, w, r)
 	})
-	r.HandleFunc("/task/done", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			handlers.DoneTaskHandler(db, w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
+
+	r.Route("/task", func(r chi.Router) {
+		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+			handlers.AddTaskHandler(store, w, r)
+		})
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			handlers.GetTaskHandler(store, w, r)
+		})
+		r.Put("/", func(w http.ResponseWriter, r *http.Request) {
+			handlers.UpdateTaskHandler(store, w, r)
+		})
+		r.Delete("/", func(w http.ResponseWriter, r *http.Request) {
+			handlers.DeleteTaskHandler(store, w, r)
+		})
+		r.Post("/done", func(w http.ResponseWriter, r *http.Request) {
+			handlers.DoneTaskHandler(store, w, r)
+		})
 	})
 }

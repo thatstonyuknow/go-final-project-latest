@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"time"
 )
@@ -54,5 +55,7 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 	// Return next date
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(nextDate))
+	if _, err := w.Write([]byte(nextDate)); err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
 }

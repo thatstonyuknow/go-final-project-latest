@@ -19,8 +19,9 @@ type TaskJSON struct {
 }
 
 // writeJson writes JSON response to the client
-func writeJson(w http.ResponseWriter, data interface{}) {
+func writeJson(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(data)
 }
 
